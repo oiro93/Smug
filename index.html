@@ -1,31 +1,63 @@
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Wyszukiwarka SmugMug</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmugMug Search</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input, button { padding: 10px; font-size: 16px; margin: 5px; width: 100%; max-width: 400px; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #eee;
+      text-align: center;
+      padding: 50px;
+    }
+    input[type="text"], select {
+      padding: 10px;
+      font-size: 16px;
+      width: 60%;
+      max-width: 400px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
   </style>
 </head>
 <body>
-  <h1>Wyszukiwarka galerii na SmugMug</h1>
-  <input type="text" id="query" placeholder="Wpisz czego szukasz...">
-  <button onclick="searchGoogle()">Szukaj w Google</button>
-  <button onclick="searchBing()">Szukaj w Bing</button>
+  <h1>Wyszukiwarka SmugMug</h1>
+  <input type="text" id="searchQuery" placeholder="Wpisz szukaną frazę..." />
+  <br />
+  <select id="engine">
+    <option value="https://www.google.com/search?q=">Google</option>
+    <option value="https://www.bing.com/search?q=">Bing</option>
+    <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+  </select>
+  <br />
+  <button onclick="search()">Szukaj</button>
 
   <script>
-    function searchGoogle() {
-      const q = document.getElementById("query").value;
-      const url = `https://www.google.com/search?q=site:smugmug.com+${encodeURIComponent(q)}`;
-      window.open(url, "_blank");
-    }
-
-    function searchBing() {
-      const q = document.getElementById("query").value;
-      const url = `https://www.bing.com/search?q=site:smugmug.com+${encodeURIComponent(q)}`;
-      window.open(url, "_blank");
+    function search() {
+      const query = document.getElementById("searchQuery").value;
+      const engine = document.getElementById("engine").value;
+      const fullQuery = "site:smugmug.com " + query;
+      if (query.trim() !== "") {
+        window.open(engine + encodeURIComponent(fullQuery), "_blank");
+      }
     }
   </script>
 </body>
