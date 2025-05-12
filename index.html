@@ -78,4 +78,110 @@
       padding: 10px;
       cursor: pointer;
     }
-    .suggestion
+    .suggestion-item:hover {
+      background-color: #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>Wyszukiwarka SmugMug</h1>
+
+  <input type="text" id="searchQuery" placeholder="Wpisz szukaną frazę..." oninput="showSuggestions()" />
+  <br />
+  
+  <div class="autocomplete-suggestions" id="autocomplete-suggestions"></div>
+  
+  <div class="filters">
+    <label>
+      <input type="checkbox" id="onlyGalleries" /> Tylko galerie
+    </label>
+    <br />
+    <label>
+      <input type="checkbox" id="imageSearch" /> Szukaj zdjęć w Google Images
+    </label>
+  </div>
+
+  <br />
+  <select id="engine">
+    <option value="https://www.google.com/search?q=">Google</option>
+    <option value="https://www.bing.com/search?q=">Bing</option>
+    <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+  </select>
+  <br />
+  <button onclick="search()">Szukaj</button>
+
+  <div class="section">
+    <h2>SmugMug Downloader – jak pobierać zdjęcia</h2>
+    <a href="https://github.com/andyjsmith/SmugMug-Downloader" target="_blank" class="button-link">
+      Otwórz SmugMug-Downloader na GitHub
+    </a>
+
+    <h3>Instrukcja krok po kroku:</h3>
+    <ol>
+      <li>Pobierz program z GitHuba (przycisk powyżej).</li>
+      <li>Upewnij się, że masz zainstalowanego <strong>Pythona</strong>.</li>
+      <li>Zainstaluj wymagane biblioteki (w terminalu):<br>
+        <code>pip install -r requirements.txt</code></li>
+      <li>Wejdź na stronę SmugMug i zaloguj się na swoje konto.</li>
+      <li>Pobierz ciasteczka (cookies.txt) przy użyciu rozszerzenia np. <strong>Get cookies.txt</strong> do Chrome lub Firefoxa.</li>
+      <li>W terminalu uruchom program, np.:<br>
+        <code>python smugmug_downloader.py https://twojalink.smugmug.com --cookie cookies.txt</code></li>
+      <li>Program automatycznie pobierze zdjęcia do folderu lokalnego.</li>
+    </ol>
+  </div>
+
+  <script>
+    const suggestions = [
+      "wedding",
+      "nature photos",
+      "landscape gallery",
+      "sports photography",
+      "family photos",
+      "portrait gallery",
+      "vacation pictures",
+      "art gallery",
+      "event photography",
+      "wildlife"
+    ];
+
+    function showSuggestions() {
+      const query = document.getElementById("searchQuery").value.toLowerCase();
+      const suggestionsList = document.getElementById("autocomplete-suggestions");
+      suggestionsList.innerHTML = "";
+      
+      if (query.length === 0) return;
+
+      const filteredSuggestions = suggestions.filter(suggestion =>
+        suggestion.toLowerCase().includes(query)
+      );
+
+      filteredSuggestions.forEach(suggestion => {
+        const item = document.createElement("div");
+        item.classList.add("suggestion-item");
+        item.innerText = suggestion;
+        item.onclick = () => {
+          document.getElementById("searchQuery").value = suggestion;
+          suggestionsList.innerHTML = "";
+        };
+        suggestionsList.appendChild(item);
+      });
+    }
+
+    function search() {
+      const query = document.getElementById("searchQuery").value;
+      let fullQuery = "site:smugmug.com " + query;
+
+      if (document.getElementById("onlyGalleries").checked) {
+        fullQuery += " inurl:gallery";
+      }
+
+      if (document.getElementById("imageSearch").checked) {
+        window.open("https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(query), "_blank");
+      } else {
+        const engine = document.getElementById("engine").value;
+        window.open(engine + encodeURIComponent(fullQuery), "_blank");
+      }
+    }
+  </script>
+</body>
+</html>
