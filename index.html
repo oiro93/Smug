@@ -1,186 +1,39 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmugMug Search & Downloader</title>
+  <meta charset="UTF-8">
+  <title>Wyszukiwarka SmugMug</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #111;
-      color: #eee;
-      text-align: center;
-      padding: 50px;
-    }
-    input[type="text"], select {
-      padding: 10px;
-      font-size: 16px;
-      width: 60%;
-      max-width: 400px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-    button, a.button-link {
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      background-color: #28a745;
-      color: white;
-      text-decoration: none;
-      cursor: pointer;
-      margin-top: 10px;
-      display: inline-block;
-    }
-    button:hover, a.button-link:hover {
-      background-color: #218838;
-    }
-    h1, h2, h3 {
-      margin-bottom: 20px;
-    }
-    .section {
-      margin-top: 60px;
-      padding-top: 30px;
-      border-top: 1px solid #444;
-    }
-    .filters {
-      text-align: left;
-      display: inline-block;
-      margin: 20px auto;
-      padding-left: 20px;
-      font-size: 14px;
-    }
-    .filters input[type="checkbox"] {
-      margin-right: 10px;
-    }
-    ol {
-      text-align: left;
-      display: inline-block;
-      margin: 0 auto;
-      padding-left: 20px;
-    }
-    li {
-      margin-bottom: 10px;
-    }
-    .autocomplete-suggestions {
-      background-color: #222;
-      border-radius: 5px;
-      max-height: 150px;
-      overflow-y: auto;
-      margin-top: 5px;
-      position: absolute;
-      width: 60%;
-      max-width: 400px;
-      z-index: 10;
-    }
-    .suggestion-item {
-      padding: 10px;
-      cursor: pointer;
-    }
-    .suggestion-item:hover {
-      background-color: #444;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { padding: 10px; font-size: 16px; margin: 5px; width: 100%; max-width: 400px; }
   </style>
 </head>
 <body>
-  <h1>Wyszukiwarka SmugMug</h1>
-
-  <input type="text" id="searchQuery" placeholder="Wpisz szukaną frazę..." oninput="showSuggestions()" />
-  <br />
-  
-  <div class="autocomplete-suggestions" id="autocomplete-suggestions"></div>
-  
-  <div class="filters">
-    <label>
-      <input type="checkbox" id="onlyGalleries" /> Tylko galerie
-    </label>
-    <br />
-    <label>
-      <input type="checkbox" id="imageSearch" /> Szukaj zdjęć w Google Images
-    </label>
-  </div>
-
-  <br />
-  <select id="engine">
-    <option value="https://www.google.com/search?q=">Google</option>
-    <option value="https://www.bing.com/search?q=">Bing</option>
-    <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
-  </select>
-  <br />
-  <button onclick="search()">Szukaj</button>
-
-  <div class="section">
-    <h2>SmugMug Downloader – jak pobierać zdjęcia</h2>
-    <a href="https://github.com/andyjsmith/SmugMug-Downloader" target="_blank" class="button-link">
-      Otwórz SmugMug-Downloader na GitHub
-    </a>
-
-    <h3>Instrukcja krok po kroku:</h3>
-    <ol>
-      <li>Pobierz program z GitHuba (przycisk powyżej).</li>
-      <li>Upewnij się, że masz zainstalowanego <strong>Pythona</strong>.</li>
-      <li>Zainstaluj wymagane biblioteki (w terminalu):<br>
-        <code>pip install -r requirements.txt</code></li>
-      <li>Wejdź na stronę SmugMug i zaloguj się na swoje konto.</li>
-      <li>Pobierz ciasteczka (cookies.txt) przy użyciu rozszerzenia np. <strong>Get cookies.txt</strong> do Chrome lub Firefoxa.</li>
-      <li>W terminalu uruchom program, np.:<br>
-        <code>python smugmug_downloader.py https://twojalink.smugmug.com --cookie cookies.txt</code></li>
-      <li>Program automatycznie pobierze zdjęcia do folderu lokalnego.</li>
-    </ol>
-  </div>
+  <h1>Wyszukiwarka galerii na SmugMug</h1>
+  <input type="text" id="query" placeholder="Wpisz czego szukasz...">
+  <button onclick="searchGoogle()">Szukaj w Google</button>
+  <button onclick="searchBing()">Szukaj w Bing</button>
+  <button onclick="searchVideo()">Szukaj wideo</button>
 
   <script>
-    const suggestions = [
-      "wedding",
-      "nature photos",
-      "landscape gallery",
-      "sports photography",
-      "family photos",
-      "portrait gallery",
-      "vacation pictures",
-      "art gallery",
-      "event photography",
-      "wildlife"
-    ];
-
-    function showSuggestions() {
-      const query = document.getElementById("searchQuery").value.toLowerCase();
-      const suggestionsList = document.getElementById("autocomplete-suggestions");
-      suggestionsList.innerHTML = "";
-      
-      if (query.length === 0) return;
-
-      const filteredSuggestions = suggestions.filter(suggestion =>
-        suggestion.toLowerCase().includes(query)
-      );
-
-      filteredSuggestions.forEach(suggestion => {
-        const item = document.createElement("div");
-        item.classList.add("suggestion-item");
-        item.innerText = suggestion;
-        item.onclick = () => {
-          document.getElementById("searchQuery").value = suggestion;
-          suggestionsList.innerHTML = "";
-        };
-        suggestionsList.appendChild(item);
-      });
+    function searchGoogle() {
+      const q = document.getElementById("query").value;
+      const url = `https://www.google.com/search?q=site:smugmug.com+${encodeURIComponent(q)}`;
+      window.open(url, "_blank");
     }
 
-    function search() {
-      const query = document.getElementById("searchQuery").value;
-      let fullQuery = "site:smugmug.com " + query;
+    function searchBing() {
+      const q = document.getElementById("query").value;
+      const url = `https://www.bing.com/search?q=site:smugmug.com+${encodeURIComponent(q)}`;
+      window.open(url, "_blank");
+    }
 
-      if (document.getElementById("onlyGalleries").checked) {
-        fullQuery += " inurl:gallery";
-      }
-
-      if (document.getElementById("imageSearch").checked) {
-        window.open("https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(query), "_blank");
-      } else {
-        const engine = document.getElementById("engine").value;
-        window.open(engine + encodeURIComponent(fullQuery), "_blank");
-      }
+    function searchVideo() {
+      const q = document.getElementById("query").value;
+      const videoQuery = `${q} (video OR footage OR mp4 OR mov OR clip OR movie)`;
+      const url = `https://www.google.com/search?q=site:smugmug.com+${encodeURIComponent(videoQuery)}`;
+      window.open(url, "_blank");
     }
   </script>
 </body>
