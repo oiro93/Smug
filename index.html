@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -50,6 +51,7 @@
       margin: 20px auto;
       padding-left: 20px;
       font-size: 14px;
+      max-width: 400px;
     }
     .filters input[type="checkbox"] {
       margin-right: 10px;
@@ -59,6 +61,7 @@
       display: inline-block;
       margin: 0 auto;
       padding-left: 20px;
+      max-width: 400px;
     }
     li {
       margin-bottom: 10px;
@@ -73,6 +76,8 @@
       width: 60%;
       max-width: 400px;
       z-index: 10;
+      left: 50%;
+      transform: translateX(-50%);
     }
     .suggestion-item {
       padding: 10px;
@@ -81,12 +86,184 @@
     .suggestion-item:hover {
       background-color: #444;
     }
+    .advanced-toggle {
+      margin-top: 20px;
+      cursor: pointer;
+      color: #28a745;
+      text-decoration: underline;
+      font-size: 14px;
+    }
+    .advanced-options {
+      display: none;
+      margin-top: 10px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      font-size: 14px;
+      border: 1px solid #444;
+      padding: 15px;
+      border-radius: 5px;
+      background-color: #222;
+    }
   </style>
 </head>
 <body>
   <h1>Wyszukiwarka SmugMug</h1>
 
-  <input type="text" id="searchQuery" placeholder="Wpisz szukaną frazę..." oninput="showSuggestions()" />
+  <input type="text" id="searchQuery" placeholder="Wpisz szukaną frazę..." oninput="showSuggestions()" autocomplete="off" />
   <br />
 
-  <div class="
+  <div class="autocomplete-suggestions" id="autocomplete-suggestions"></div>
+
+  <div class="filters">
+    <label>
+      <input type="checkbox" id="onlyGalleries" /> Tylko galerie
+    </label>
+    <br />
+    <label>
+      <input type="checkbox" id="imageSearch" /> Szukaj zdjęć w Google Images
+    </label>
+  </div>
+
+  <br />
+  <select id="engine">
+    <option value="google">Google</option>
+    <option value="bing">Bing</option>
+    <option value="duckduckgo">DuckDuckGo</option>
+  </select>
+  <br />
+  <button onclick="search()">Szukaj</button>
+  <button onclick="searchVideo()">Szukaj wideo</button>
+
+  <div class="advanced-toggle" onclick="toggleAdvanced()">Pokaż zaawansowane opcje wyszukiwania wideo</div>
+  <div class="advanced-options" id="advancedOptions">
+    <label><input type="checkbox" id="filterOnlyVideos" /> Tylko filmy (mp4, video, play video)</label><br>
+    <label><input type="checkbox" id="filterVideoGalleries" /> Galerie zawierające wideo</label>
+  </div>
+
+  <div class="section">
+    <h2>SmugMug Downloader – jak pobierać zdjęcia</h2>
+    <a href="https://github.com/andyjsmith/SmugMug-Downloader" target="_blank" class="button-link">
+      Otwórz SmugMug-Downloader na GitHub
+    </a>
+
+    <h3>Instrukcja krok po kroku:</h3>
+    <ol>
+      <li>Pobierz program z GitHuba (przycisk powyżej).</li>
+      <li>Upewnij się, że masz zainstalowanego <strong>Pythona</strong>.</li>
+      <li>Zainstaluj wymagane biblioteki (w terminalu):<br>
+        <code>pip install -r requirements.txt</code></li>
+      <li>Wejdź na stronę SmugMug i zaloguj się na swoje konto.</li>
+      <li>Pobierz ciasteczka (cookies.txt) przy użyciu rozszerzenia np. <strong>Get cookies.txt</strong> do Chrome lub Firefoxa.</li>
+      <li>W terminalu uruchom program, np.:<br>
+        <code>python smugmug_downloader.py https://twojalink.smugmug.com --cookie cookies.txt</code></li>
+      <li>Program automatycznie pobierze zdjęcia do folderu lokalnego.</li>
+    </ol>
+  </div>
+
+  <script>
+    const suggestions = [
+      "wedding",
+      "nature photos",
+      "landscape gallery",
+      "sports photography",
+      "family photos",
+      "portrait gallery",
+      "vacation pictures",
+      "art gallery",
+      "event photography",
+      "wildlife",
+      "ślub video",
+      "drone footage",
+      "4k recording",
+      "wideo z eventów"
+    ];
+
+    function showSuggestions() {
+      const query = document.getElementById("searchQuery").value.toLowerCase();
+      const suggestionsList = document.getElementById("autocomplete-suggestions");
+      suggestionsList.innerHTML = "";
+
+      if (query.length === 0) return;
+
+      const filteredSuggestions = suggestions.filter(suggestion =>
+        suggestion.toLowerCase().includes(query)
+      );
+
+      filteredSuggestions.forEach(suggestion => {
+        const item = document.createElement("div");
+        item.classList.add("suggestion-item");
+        item.innerText = suggestion;
+        item.onclick = () => {
+          document.getElementById("searchQuery").value = suggestion;
+          suggestionsList.innerHTML = "";
+        };
+        suggestionsList.appendChild(item);
+      });
+    }
+
+    function search() {
+      const query = document.getElementById("searchQuery").value;
+      let fullQuery = "site:smugmug.com " + query;
+
+      if (document.getElementById("onlyGalleries").checked) {
+        fullQuery += " inurl:gallery";
+      }
+
+      if (document.getElementById("imageSearch").checked) {
+        window.open("https://www.google.com/search?tbm=isch&q=" + encodeURIComponent(query), "_blank");
+      } else {
+        const engine = document.getElementById("engine").value;
+        let baseUrl = "https://www.google.com/search?q=";
+        if (engine === "bing") {
+          baseUrl = "https://www.bing.com/search?q=";
+        } else if (engine === "duckduckgo") {
+          baseUrl = "https://duckduckgo.com/?q=";
+        }
+        window.open(baseUrl + encodeURIComponent(fullQuery), "_blank");
+      }
+    }
+
+    function searchVideo() {
+      const query = document.getElementById("searchQuery").value.trim();
+      if (!query) {
+        alert("Proszę wpisać frazę do wyszukania.");
+        return;
+      }
+
+      let videoQuery = `site:smugmug.com (${query})`;
+      const onlyVideos = document.getElementById("filterOnlyVideos").checked;
+      const videoGalleries = document.getElementById("filterVideoGalleries").checked;
+
+      if (onlyVideos) {
+        videoQuery += ` (filetype:mp4 OR inurl:video OR "play video")`;
+      } else if (videoGalleries) {
+        videoQuery += ` (gallery OR Browse) (video OR mp4 OR "play video")`;
+      } else {
+        videoQuery += ` (video OR mp4 OR "play video")`;
+      }
+      videoQuery += ` -site:help.smugmug.com`;
+
+      const engine = document.getElementById("engine").value;
+      let baseUrl = "https://www.google.com/search?q=";
+      if (engine === "bing") {
+        baseUrl = "https://www.bing.com/search?q=";
+      } else if (engine === "duckduckgo") {
+        baseUrl = "https://duckduckgo.com/?q=";
+      }
+
+      window.open(baseUrl + encodeURIComponent(videoQuery), "_blank");
+    }
+
+    function toggleAdvanced() {
+      const adv = document.getElementById("advancedOptions");
+      if (adv.style.display === "block") {
+        adv.style.display = "none";
+      } else {
+        adv.style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
